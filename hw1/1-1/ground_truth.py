@@ -23,7 +23,7 @@ def main():
 	plt.title('Simulate function')
 	plt.ylabel('loss')
 	plt.xlabel('epochs')
-	plt.legend(['Ground Truth', 'Deep','Shallow', 'Most shallow'], loc='upper right')
+	plt.legend(['Ground Truth', 'Model1','Model2', 'Model3'], loc='upper right')
 	plt.show()
 
 if __name__ == '__main__':
