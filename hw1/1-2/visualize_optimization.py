@@ -107,6 +107,7 @@ class DNN(nn.Module):
 loss_history = []
 acc_history = []
 weights_history = []
+layer_history = []
 
 
 # In[8]:
@@ -178,6 +179,17 @@ def get_model_weights():
 # In[11]:
 
 
+def get_layer_weights():
+    weights = np.array([])
+    for p in model.parameters():
+        weights = np.concatenate((weights, np.ndarray.flatten(p.cpu().data.numpy())))
+        break
+    return weights
+
+
+# In[12]:
+
+
 weight_num = 0
 for i in range(8):
     model = DNN()
@@ -188,6 +200,7 @@ for i in range(8):
     event_loss = []
     event_acc = []
     event_weights = []
+    event_layers = []
     
     for epoch in range(epochs):
         print("Event %d, Epoch %d" % (i+1, epoch), end='\r')
@@ -197,16 +210,19 @@ for i in range(8):
             event_loss.append(loss)
             event_acc.append(acc)
             weights = get_model_weights()
+            layers = get_layer_weights()
             event_weights.append(weights)
+            event_layers.append(layers)
             
         
     #save_result(i)
     loss_history.append(event_loss)
     acc_history.append(event_acc)
     weights_history.append(event_weights)
+    layer_history.append(event_layers)
 
 
-# In[12]:
+# In[13]:
 
 
 import matplotlib.pyplot as plt
@@ -214,7 +230,7 @@ get_ipython().run_line_magic('matplotlib', 'inline')
 import matplotlib.cm as cm
 
 
-# In[13]:
+# In[14]:
 
 
 plt.clf()
@@ -231,7 +247,7 @@ plt.show()
 
 # The principal components (eigenvectors of the covariance matrix) correspond to the direction (in the original n-dimensional space) with the greatest variance
 
-# In[14]:
+# In[15]:
 
 
 colormap = plt.cm.gist_ncar
@@ -240,88 +256,110 @@ colors = [i[:3] for i in colors]
 print ("weight shape:", np.array(weights_history).shape)
 
 
-# In[15]:
+# In[16]:
 
 
 print (colors)
 
 
-# In[16]:
+# In[17]:
 
 
 from sklearn.decomposition import PCA
 
 
-# In[17]:
+# In[18]:
 
 
-np.array(weights_history).shape
+print (np.array(weights_history).shape)
+print (np.array(layer_history).shape)
+
+
+# In[19]:
+
+
+weights_history = np.array(weights_history).reshape(nevent*((epochs+2)//3), -1)
+layer_history = np.array(layer_history).reshape(nevent*((epochs+2)//3), -1)
 
 
 # In[20]:
 
 
-weights_history = np.array(weights_history).reshape(nevent*((epochs+2)//3), -1)
+pca = PCA(n_components=2)
+pca_weights = pca.fit_transform(weights_history)
+print ("pca weights shape:", np.array(pca_weights).shape)
+pca = PCA(n_components=2)
+pca_layer = pca.fit_transform(layer_history)
+print ("pca layer shape:", np.array(pca_layer).shape)
 
 
 # In[21]:
 
 
-pca = PCA(n_components=2)
-pca_weights = pca.fit_transform(weights_history)
-print ("pca shape:", np.array(pca_weights).shape)
-
-
-# In[22]:
-
-
 pca_weights = pca_weights.reshape(nevent, (epochs+2)//3, 2)
+pca_layer = pca_layer.reshape(nevent, (epochs+2)//3, 2)
 
 
-# In[23]:
+# In[32]:
 
 
-fig = plt.figure(figsize = (8,8))
-ax = fig.add_subplot(111)
-ax.set_xlabel('Principal Component 1', fontsize = 15)
-ax.set_ylabel('Principal Component 2', fontsize = 15)
-ax.set_title('2 Component PCA', fontsize = 20)
+fig = plt.figure(figsize = (12,6))
+ax = fig.add_subplot(121)
+ax.set_xlabel('model', fontsize = 15)
+#ax.set_ylabel('Principal Component 2', fontsize = 15)
+ax.set_title('PCA', fontsize = 20)
 
 for target, color in zip(pca_weights, colors):
     ax.scatter(target[:, 0], target[:, 1], c = color, s = 50)
     for idx in range(len(target)):
         ax.annotate(str(acc_history[i][idx]), (target[idx][0], target[idx][1]))
+ax.grid()
+        
+ax = fig.add_subplot(122)
+ax.set_xlabel('layer', fontsize = 15)
+#ax.set_ylabel('Principal Component 2', fontsize = 15)
+ax.set_title('PCA', fontsize = 20)
+
+for target, color in zip(pca_layer, colors):
+    ax.scatter(target[:, 0], target[:, 1], c = color, s = 50)
+    for idx in range(len(target)):
+        ax.annotate(str(acc_history[i][idx]), (target[idx][0], target[idx][1]))
 
 ax.grid()
-plt.savefig('pca.png')
+plt.savefig('pca2.png')
 
 
-# In[24]:
+# In[23]:
 
 
 from sklearn.manifold import TSNE
 
 
-# In[25]:
+# In[24]:
 
 
 T = TSNE(n_components=2)
 tsne_weights = T.fit_transform(weights_history)
 print ("tsne weights shape:", np.array(tsne_weights).shape)
+T = TSNE(n_components=2)
+tsne_layer = T.fit_transform(layer_history)
+print ("tsne layer shape:", np.array(tsne_layer).shape)
 
 
-# In[26]:
+# In[25]:
 
 
 tsne_weights = tsne_weights.reshape(nevent, (epochs+2)//3, -1)
+tsne_layer = tsne_layer.reshape(nevent, (epochs+2)//3, -1)
 
 
-# In[27]:
+# In[33]:
 
 
-fig = plt.figure(figsize = (8,8))
-ax = fig.add_subplot(111)
+fig = plt.figure(figsize = (12,6))
+ax = fig.add_subplot(121)
 ax.set_title('T-SNE', fontsize = 20)
+ax.set_xlabel('model', fontsize = 15)
 
 for i in range(8):
     x = tsne_weights[i][:, 0]
@@ -329,12 +367,23 @@ for i in range(8):
     ax.scatter(x, y, c= colors[i])
     for idx in range(len(x)):
         ax.annotate(str(acc_history[i][idx]), (x[idx], y[idx]))
+ax.grid()        
+ax = fig.add_subplot(122)
+ax.set_title('T-SNE', fontsize = 20)
+ax.set_xlabel('layer', fontsize = 15)
+
+for i in range(8):
+    x = tsne_layer[i][:, 0]
+    y = tsne_layer[i][:, 1]
+    ax.scatter(x, y, c= colors[i])
+    for idx in range(len(x)):
+        ax.annotate(str(acc_history[i][idx]), (x[idx], y[idx]))
 
 ax.grid()
-plt.savefig('tsne.png')
+plt.savefig('tsne2.png')
 
 
-# In[28]:
+# In[27]:
 
 
 import pickle
