@@ -1,7 +1,7 @@
 # MLDS hw2-2
 
 ## Requirements
-* Pytorch == 0.3.1
+* Pytorch 0.3.1
 * numpy
 
 ## Train
