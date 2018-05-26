@@ -28,7 +28,8 @@ def save_imgs(gen_imgs):
             axs[i,j].axis('off')
             cnt += 1
     #fig.savefig("samples/cgan_original.png")
-    fig.savefig("samples/cgan-%d.png" % seed)
+    #fig.savefig("samples/cgan-%d.png" % seed)
+    fig.savefig("samples/cgan.png")
     plt.close()
 
 with open(sys.argv[1]) as f:
