@@ -8,7 +8,7 @@ matplotlib.use('Agg')
 
 torch.backends.cudnn.benchmark = True
 batch_size=64
-seed = 878787
+seed = int(sys.argv[2])
 random.seed(seed)
 np.random.seed(seed)
 torch.manual_seed(seed)
@@ -28,7 +28,7 @@ def save_imgs(gen_imgs):
             axs[i,j].axis('off')
             cnt += 1
     #fig.savefig("samples/cgan_original.png")
-    #fig.savefig("samples/cgan-%d.png" % seed)
+    #fig.savefig("test/cgan-%d.png" % seed)
     fig.savefig("samples/cgan.png")
     plt.close()
 

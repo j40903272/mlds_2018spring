@@ -10,7 +10,7 @@ latent_dim = 128
 colorizer = torch.load(os.path.join('saved_model', 'Colorizer-x.pt'))
 #colorizer = torch.load(os.path.join('saved_model', 'Colorizer-290.pt'))
 colorizer = colorizer.eval()
-hairIllum = [0.4, 0.9, 0.6, 0.5, 0.5, 0.3, 0.5, 0.6, 0.3, 0.15, 0.4, 0.7]
+Illum = [0.4, 0.9, 0.6, 0.5, 0.5, 0.3, 0.5, 0.6, 0.3, 0.15, 0.4, 0.7]
 
 
 def draw(tagtext, generator, std=0.2, input_imgs=None, resize=True, output_num=1):
@@ -35,7 +35,7 @@ def draw(tagtext, generator, std=0.2, input_imgs=None, resize=True, output_num=1
         # generate image
         noise = torch.randn(output_num, latent_dim) * std
         noise = createVariable(noise, True, True)
-        I = torch.FloatTensor([hairIllum[hair] for _ in range(output_num)])
+        I = torch.FloatTensor([Illum[hair] for _ in range(output_num)])
         I = createVariable(I, True, True)
         x = generator(noise, I)
     else:

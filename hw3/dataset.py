@@ -29,12 +29,9 @@ class Data(Dataset):
         
         data = []
         for img in imgs:
-            I = illum(img)
-            t = I[8:24, 16:-16]
-            l = t >= np.percentile(t, 25)
-            u = t <= np.percentile(t, 75)
-            tag = float(np.mean(t[np.logical_and(l, u)]))
-            data.append((I, tag))
+            gray = illum(img)
+            tag = float(np.mean(gray)) #illum
+            data.append((gray, tag))
         
         data = [(torch.from_numpy(img).float().unsqueeze(0), FloatTensor([tag])) for img, tag in data]
         self.data = data
