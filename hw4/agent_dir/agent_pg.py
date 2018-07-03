@@ -1,5 +1,5 @@
 from agent_dir.agent import Agent
-from agent_dir.model import Policy, cnn_Policy
+from agent_dir.model import Policy
 import scipy
 import numpy as np
 import os
@@ -133,10 +133,10 @@ class Agent_PG(Agent):
         policy_loss.backward()
         optimizer.step()
 
-        # Reset
-        policy.rewards = []
-        policy.log_probs = Variable(torch.Tensor()).cuda()
-
         # save log
         policy.loss_history.append(policy_loss.data[0])
         policy.reward_history.append(np.sum(policy.rewards))
+    
+        # Reset
+        policy.rewards = []
+        policy.log_probs = Variable(torch.Tensor()).cuda()
