@@ -105,8 +105,8 @@ class Agent_DQN(Agent):
                 the predicted action from trained model
         """
 
-        return self.Q(Variable(torch.FloatTensor(observation).unsqueeze(0)).cuda()).max(-1)[1].data[0]
-
+        action = self.Q(Variable(torch.FloatTensor(observation).unsqueeze(0)).cuda()).max(-1)[1].data[0]
+        return action.item()
 
     def get_eps(self, frame):
         return max(self.eps_end, self.eps_start - frame / self.eps_frames)

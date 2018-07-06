@@ -99,8 +99,7 @@ class Agent_PG(Agent):
             policy.log_probs = torch.cat((policy.log_probs, c.log_prob(action).cuda()))
         else:
             policy.log_probs = c.log_prob(action).cuda()
-        return action.data[0]
-    
+        return action.data[0].item()
     
     def save_model(self):
         torch.save(self.policy.state_dict(), self.path)
